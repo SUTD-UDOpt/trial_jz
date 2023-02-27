@@ -1,0 +1,822 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>2211 UI Test 2</title>
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.1.3/dist/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+        <link rel="stylesheet" href="static/style.css">
+    </head>
+
+    <script src="https://sdk.amazonaws.com/js/aws-sdk-2.835.0.min.js"></script>
+    
+    <body>
+      <div id="loader" class="popbg">
+         <div id="spinner" class="spinner"></div>
+      </div>
+
+      <div id="help" style="right: 2vw; top: 2vw; position: absolute;">
+         <button id="helpButton" class="rounding special" style="width: 36px; height: 36px; border: #f3f3f3;">?</button>
+      </div>
+
+      <div class="popcontainer" id="popup">
+         <div class="popbg" id="firstInst"></div>
+         <div class="container-fluid pop" id="instPop">
+            <div class="row invisibleScroll" style="width: 100%; margin: 0px;">
+               <div class="col" id="popup10">
+                  <h5 class="row">Task</h5>
+                  <p class="row">This work-in-progress tool supports urban planners to generate likely development scenarios for land parcels in Singapore. Choose a parcel and use this optimization tool to find the most satisfactory building solution. The optimization objectives tested here are building orientation and view obstruction. The Gross Plot Ratio (GPR) of each parcel is fixed. You will test 2 different optimization interfaces: an advanced interface and a simple interface. You will be able to rerun each optimization multiple times.</p>
+                  <p class="row">
+                     You can read this task again by clicking the help button at the top right corner of the screen.
+                  </p>
+               </div>
+
+               <div class="col" id="popup0" style="display: none;">
+                  <h5 class="row">Instruction for simple optimization</h5>
+                  <ul class="row">
+                     <li>Select a parcel that you wish to optimize by clicking on the available parcels. Click the “FINALIZE” button when you are done with your selection.</li>
+                     <li>Please input the value of each parameter. In this case, determine how narrow or broad you would like the search for solutions to be.</li>
+                     <li>Broader search will likely return more results but will take longer to optimize.</li>
+                     <li>To begin the optimization process, click the “OPTIMIZE” button.</li>
+                     <li>You can read these instructions again by clicking the help button at the top right corner of the screen.</li>
+                  </ul>
+               </div>
+
+               <div class="col" id="popup2" style="display: none;">
+                  <h5 class="row">Instruction for simple optimization results</h5>
+                  <ul class="row">
+                     <li>You will find a list of result buttons after the optimization is completed.</li>
+                     <li>You can toggle between these buttons to visualize the generated solutions on the parcel. </li>
+                     <li>If you find a solution that you find satisfactory, you can click the “SUBMIT” button to key in your chosen solution.</li>
+                     <li>If you do not find any satisfactory result, you can click the “RESET” button to redefine your parameters and rerun the optimization.</li>
+                     <li>You can read these instructions again by clicking the help button at the top right corner of the screen.</li>
+                  </ul>
+                  <div class="row">
+                     <img class="sliderDesc" src="./static/images/objective.png" style="display: block;">
+                  </div>
+               </div>
+
+               <div class="col" id="popup4">
+                  <h5 class="row">Instruction for advanced optimization</h5>
+                  <ul class="row">
+                     <li>Select a parcel that you wish to optimize by clicking on the available parcels. Click the “FINALIZE” button when you are done with your selection.</li>
+                     <li>In this section, the setting is divided into 3 groups: “Model Parameters”, “Objective Weights” and “Optimization Settings”</li>
+                     <li>Within “Model Parameters,” you will find 5 sliders. BKeyXScale and BKeyYScale sliders define the length and width of the selected block keys for optimization respectively. You can see which block keys are being selected on the interface.</li>
+                     <li>GridAngle and GridSpacing sliders define the rotation and size of the grid that will divide the parcel and hence define where the block keys can be built within the parcel</li>
+                     <li>ParcelStoreyScale slider defines the range of building heights that will be searched. Each parcel has its own GPR target, so the shorter the buildings are, the greater number of buildings will be built within the parcel.</li>
+                     <li>Number of generation and population defines the generation and population of the optimization. For a decent optimization time, it is advised to keep the numbers smaller or equal to 10.</li>
+                     <li>Objective Weights and optimization settings are optional. Weight inputs will turn the optimization process into a weighted single objective optimization. You will be asked to input a weight between 1 and 100 for each optimization objective. The weight of an objective defines its importance relative to the other objectives.</li>
+                     <li>Crossover is a genetic algorithm GA operator controlling the extent to which the parameters of two parent variants are mixed to generate new offspring. It generates stochastically new solutions from an existing population. 100% crossover will result in all members of the next generation created via crossover. 0% cross over will result in all members of the next generation copied from the previous generation, with no mixing.</li>
+                     <li>Mutation is a genetic algorithm GA operator that applies changes randomly to variant parameters to produce new variants. Mutation rate controls the number of parameters that are randomly changed. </li>
+                     <li>To begin the optimization process, click the “OPTIMIZE” button.</li>
+                     <li>You can read these instructions again by clicking the help button at the top right corner of the screen.</li>
+                  </ul>
+               </div>
+
+               <div class="col" id="popup6" style="display: none;">
+                  <h5 class="row">Instruction for advanced optimization results</h5>
+                  <ul class="row">
+                     <li>You will find a list of result buttons after the optimization is completed.</li>
+                     <li>You can toggle between these buttons to visualize the generated solutions on the parcel.</li>
+                     <li>Objective 1 (NS Orientation): Minimize façade exposure to east-west orientation for reducing heating due to direct sun exposure. A score of 0.5 means building footprint has twice as much of building façade facing NS than EW.</li>
+                     <li>Objective 2 (View Obstruction): Minimize view obstruction from units by penalizing any building placed too close to another building. A score of 100 means a sum of 100 obstructions found within 90m from all units.</li>
+                     <li>If you find a solution that you find satisfactory, you can click the “SUBMIT” button to key in your chosen solution.</li>
+                     <li>If you do not find any satisfactory result, you can click the “RESET” button to redefine your parameters and rerun the optimization.</li>
+                     <li>You can read these instructions again by clicking the help button at the top right corner of the screen.</li>
+                  </ul>
+                  <div class="row">
+                     <img class="sliderDesc" src="./static/images/objective.png" style="display: block;">
+                  </div>
+               </div>
+
+               <div class="col" id="popup12" style="display: none;">
+                  <h5 class="row">You're almost done!</h5>
+                  <p class="row">Please don't close this tab for another ~1 minute. in the mean time please fill this short google form survey!</p>
+               </div>
+
+               <div class="col" id="popup13" style="display: none;">
+                  <p id="sliderDesc" class="row"></p>
+                  <img id="sliderImg1" class="sliderDesc" src="./static/images/slider_1.png">
+                  <img id="sliderImg2" class="sliderDesc" src="./static/images/slider_2.png">
+                  <img id="sliderImg3" class="sliderDesc" src="./static/images/slider_3.png">
+                  <img id="sliderImg4" class="sliderDesc" src="./static/images/slider_4.png">
+                  <img id="sliderImg5" class="sliderDesc" src="./static/images/slider_5.png">
+               </div>
+            </div>
+
+            <div class="row justify-content-md-center">
+               <button class="col-2 special" id="ok">OK</button>
+               <a class="col-2" id="end" style="display: none" href="https://forms.gle/pKr9fejSzxcE9GmL9" target="_blank">
+                  <button class="special" >to Google Form</button>
+               </a>
+            </div>
+         </div>
+
+         <div class="pop" id="popup1" style="display: none;">
+            <div class="row" style="margin-bottom: 2vh;">
+               <tiny>Please be patient while optimization is running! This may take anywhere between 1-10 minutes.</tiny>
+            </div>
+            <form onsubmit="return false">
+               <div class="form-group">
+                  <label for="qn1_0">Explain your choice of optimization search pattern?</label>
+                  <input type="text" class="form-control" id="qn1_0" name="firstname" placeholder="Answer.." autocomplete="off" required>
+               </div>
+
+               <div class="form-group" id="likert1_1">
+                  <div class="form-row">
+                     <label for="qn1_1">How confident are you in finding a satisfactory solution in this round?</label>
+                  </div>
+               </div>
+
+               <div class="form-group">
+                  <label for="qn1_2">In your opinion how will the optimization results in the simple round perform compared to the advanced round?</label>
+                  <input type="text" class="form-control" id="qn1_2" name="lastname" placeholder="Answer.." autocomplete="off" required>
+               </div>
+               
+               <button class="btn" id="submit1" style="background-color: #1b1b3a; color:#f3f3f3;">Submit</button>
+            </form>
+         </div>
+
+         <div class="pop" id="popup3" style="display: none;">
+            <form onsubmit="return false">
+               <div class="form-group">
+                  <label for="qn3_0">Why was none of the generated outputs satisfactory?</label>
+                  <input type="text" class="form-control" id="qn3_0" name="firstname" placeholder="Answer.." autocomplete="off" required>
+               </div>
+
+               <div class="form-group">
+                  <label for="qn3_1">How are you planning to modify the parameter this time?</label>
+                  <input type="text" class="form-control" id="qn3_1" name="firstname" placeholder="Answer.." autocomplete="off" required>
+               </div>
+
+               <div class="form-group" id="likert3_2">
+                  <div class="form-row">
+                     <label for="qn3_2">How confident are you in finding a satisfactory solution in the next round?</label>
+                  </div>
+               </div>
+               
+               <button class="btn" id="submit3" style="background-color: #1b1b3a; color:#f3f3f3;">Submit</button>
+            </form>
+         </div>
+
+         <div class="pop" id="popup5" style="display: none;">
+            <div class="row" style="margin-bottom: 2vh;">
+               <tiny>Please be patient while optimization is running! This may take anywhere between 1-10 minutes.</tiny>
+            </div>
+            <form onsubmit="return false">
+               <div class="form-group">
+                  <label for="qn5_0">Explain your choice of optimization search pattern?</label>
+                  <input type="text" class="form-control" id="qn5_0" name="firstname" placeholder="Answer.." autocomplete="off" required>
+               </div>
+            
+               <div class="form-group" id="likert5_1">
+                  <div class="form-row">
+                     <label for="qn5_1">How confident are you in finding a satisfactory solution in the next round?</label>
+                  </div>
+               </div>
+               
+               <button class="btn" id="submit5" style="background-color: #1b1b3a; color:#f3f3f3;">Submit</button>
+            </form>
+         </div>
+
+         <div class="pop" id="popup7" style="display: none;">
+            <form onsubmit="return false">
+               <div class="form-group">
+                  <label for="qn7_0">Why was none of the generated outputs satisfactory?</label>
+                  <input type="text" class="form-control" id="qn7_0" name="firstname" placeholder="Answer.." autocomplete="off" required>
+               </div>
+
+               <div class="form-group">
+                  <label for="qn7_1">How are you planning to modify the parameter this time?</label>
+                  <input type="text" class="form-control" id="qn7_1" name="firstname" placeholder="Answer.." autocomplete="off" required>
+               </div>
+
+               <div class="form-group" id="likert7_2">
+                  <div class="form-row">
+                     <label for="q7_2">How confident are you in finding a satisfactory solution in the next round?</label>
+                  </div>
+               </div>
+               
+               <button class="btn" id="submit7" style="background-color: #1b1b3a; color:#f3f3f3;">Submit</button>
+            </form>
+         </div>
+
+         <div class="pop" id="popup8" style="display: none;">
+            <form onsubmit="return false">
+               <div class="form-group" id="likert8_0">
+                  <div class="form-row">
+                     <label for="qn8_0"><b>I was successful in completing the task.</b></label>
+                  </div>
+               </div>
+            
+               <div class="form-group" id="likert8_1">
+                  <div class="form-row">
+                     <label for="qn8_1"><b>The task was mentally challenging.</b></label>
+                  </div>
+               </div>
+
+               <div class="form-group" id="likert8_2">
+                  <div class="form-row">
+                     <label for="qn8_2"><b>I put in a lot of effort to complete this task.</b></label>
+                  </div>
+               </div>
+
+               <div class="form-group" id="likert8_3">
+                  <div class="form-row">
+                     <label for="qn8_3"><b>The amount of time required to reach a result was reasonable.</b></label>
+                  </div>
+               </div>
+
+               <div class="form-group" id="likert8_4">
+                  <div class="form-row">
+                     <label for="qn8_4"><b>I found the task irritating, stressful / frustrating to complete.</b></label>
+                  </div>
+               </div>
+
+               <div class="form-group" id="likert8_5">
+                  <div class="form-row">
+                     <label for="qn8_5"><b>The available information regarding each result was enough to make a decision.</b></label>
+                  </div>
+               </div>
+
+               <div class="form-group" id="likert8_6">
+                  <div class="form-row">
+                     <label for="qn86"><b>The variety of solutions was satisfactory for the chosen parameters.</b></label>
+                  </div>
+               </div>
+
+               <div class="form-group" id="likert8_7">
+                  <div class="form-row">
+                     <label for="qn8_7"><b>The quality of solutions generated was satisfactory in general.</b></label>
+                  </div>
+               </div>
+
+               <div class="form-group" id="likert8_8">
+                  <div class="form-row">
+                     <label for="qn8_8"><b>Generated results were believable / trustworthy.</b></label>
+                  </div>
+               </div>
+
+               <div class="form-group" id="likert8_9">
+                  <div class="form-row">
+                     <label for="qn8_9"><b>I am experienced with design optimization tools.</b></label>
+                  </div>
+               </div>
+
+               <div class="form-group">
+                  <label for="qn8_10">What is your profession?</label>
+                  <input type="text" class="form-control" id="qn8_10" placeholder="profession.." autocomplete="off" required>
+               </div>
+               
+               <button class="btn" id="submit8" style="background-color: #1b1b3a; color:#f3f3f3;">Submit</button>
+            </form>
+         </div>
+
+         <div class="pop" id="popup9" style="display: none;">
+            <form onsubmit="return false">
+               <div class="form-group" id="likert9_0">
+                  <div class="form-row">
+                     <label for="qn9_0"><b>I was successful in completing the task.</b></label>
+                  </div>
+               </div>
+            
+               <div class="form-group" id="likert9_1">
+                  <div class="form-row">
+                     <label for="qn9_1"><b>The task was mentally challenging.</b></label>
+                  </div>
+               </div>
+
+               <div class="form-group" id="likert9_2">
+                  <div class="form-row">
+                     <label for="qn9_2"><b>I put in a lot of effort to complete this task.</b></label>
+                  </div>
+               </div>
+
+               <div class="form-group" id="likert9_3">
+                  <div class="form-row">
+                     <label for="qn9_3"><b>The amount of time required to reach a result was reasonable.</b></label>
+                  </div>
+               </div>
+
+               <div class="form-group" id="likert9_4">
+                  <div class="form-row">
+                     <label for="qn9_4"><b>I found the task irritating, stressful / frustrating to complete.</b></label>
+                  </div>
+               </div>
+
+               <div class="form-group" id="likert9_5">
+                  <div class="form-row">
+                     <label for="qn9_5"><b>The available information regarding each result was enough to make a decision.</b></label>
+                  </div>
+               </div>
+
+               <div class="form-group" id="likert9_6">
+                  <div class="form-row">
+                     <label for="qn9_6"><b>The variety of solutions was satisfactory for the chosen parameters.</b></label>
+                  </div>
+               </div>
+
+               <div class="form-group" id="likert9_7">
+                  <div class="form-row">
+                     <label for="qn9_7"><b>The quality of solutions generated was satisfactory in general.</b></label>
+                  </div>
+               </div>
+
+               <div class="form-group" id="likert9_8">
+                  <div class="form-row">
+                     <label for="qn9_8"><b>Generated results were believable / trustworthy.</b></label>
+                  </div>
+               </div>
+
+               <div class="form-group" id="likert9_9">
+                  <div class="form-row">
+                     <label for="qn9_9"><b>"Model Parameter" was confusing to use.</b></label>
+                  </div>
+               </div>
+
+               <div class="form-group" id="likert9_10">
+                  <div class="form-row">
+                     <label for="qn9_10"><b>"Objective Weights" was confusing to use.</b></label>
+                  </div>
+               </div>
+
+               <div class="form-group" id="likert9_11">
+                  <div class="form-row">
+                     <label for="qn9_11"><b>"Optimization Settings" was confusing to use.</b></label>
+                  </div>
+               </div>
+               
+               <button class="btn" id="submit9" style="background-color: #1b1b3a; color:#f3f3f3;">Submit</button>
+            </form>
+         </div>
+
+         <div class="pop" id="popup11" style="display: none;">
+            <div class="closeBtn" id="closeButton">x</div>
+            <form onsubmit="return false">
+               <div class="form-group">
+                  <label for="qn11_0">Selected Result ID</label>
+                  <select id="qn11_0"></select>
+               </div>
+               
+               <button class="btn" id="submit11" style="background-color: #1b1b3a; color:#f3f3f3;">Submit</button>
+            </form>
+         </div>
+      </div>
+
+      <div id="base">
+            <div id="container" class="container-fluid prevent-select">
+               <div id="overlayBackground" class="row invisibleScroll">
+                  <div id="phase0" class="flexcontainer container-fluid">
+                     <div class="row">
+                        <h5>Select a Parcel to Work with</h5>
+                     </div>
+                     <div class="row">
+                        <input type="button" id="parcelButton" class="narrow disabled" value="FINALIZE" style="margin-top: 2vh" disabled>
+                     </div>
+                  </div>
+
+                  <div id="param" class="flexcontainer container-fluid" style="display: none;">
+                     <div id="phase1" class="flexcontainer container-fluid">
+                        <div class="row" style="width: 95%;">
+                           <h5>Select your search range</h5>
+                        </div>
+                        <div slider id="sliderSimple" class="row" style="width: 95%;">
+                           <div id="sliderS">
+                              <div class="inverse-left" id="sl0_0" style="width:0%;"></div>
+                              <div class="inverse-right" id="sl0_1" style="width:100%;"></div>
+                              <div class="doubleSlider" id="sl0_2" style="left:0%;right:100%;"></div>
+                              <span class="thumb" id="sl0_3" style="left:0%;"></span>
+                           </div>
+                           <input class="doubleSlider" type="range" id="simple1" style="width: 95%;" tabindex="0" value="0" max="100" min="0" step="1"/>
+                        </div>
+                        <div class="row justify-content-between" style="width: 95%;">
+                           <span>Narrow</span>
+                           <span>Broad</span>
+                        </div>
+                     </div>
+
+                     <div id="phase3" class="flexcontainer container-fluid">
+                        <div class="row" style="width: 95%;">
+                           <h5>Model Parameters</h5>
+                        </div>
+
+                        <div id="footPrintDisplay" class="row" style="width: 100%;">
+                           <div class="col-12" style="border: solid #1b1b3a 2px" >
+                              <div class="row d-flex justify-content-center">
+                                 <div id="ft0" class="col-lg-2 ftIcon tight"></div>
+                                 <div id="ft1" class="col-lg-2 ftIcon tight"></div>
+                                 <div id="ft2" class="col-lg-2 ftIcon tight"></div>
+                                 <div id="ft3" class="col-lg-2 ftIcon tight"></div>                               
+                                 <div id="ft4" class="col-lg-2 ftIcon tight"></div>
+                              </div>
+                              <div class="row d-flex justify-content-center">
+                                 <div id="ft5" class="col-lg-2 ftIcon tight"></div>
+                                 <div id="ft6" class="col-lg-2 ftIcon tight"></div>
+                                 <div id="ft7" class="col-lg-2 ftIcon tight"></div>
+                                 <div id="ft8" class="col-lg-2 ftIcon tight"></div>                               
+                                 <div id="ft9" class="col-lg-2 ftIcon tight"></div>
+                              </div>
+                              <div class="row d-flex justify-content-center">
+                                 <div id="ft10" class="col-lg-2 ftIcon tight"></div>
+                                 <div id="ft11" class="col-lg-2 ftIcon tight"></div>
+                                 <div id="ft12" class="col-lg-2 ftIcon tight"></div>
+                                 <div id="ft13" class="col-lg-2 ftIcon tight"></div>                               
+                                 <div id="ft14" class="col-lg-2 ftIcon tight"></div>
+                              </div>
+                           </div>
+                        </div>
+
+                        <div class="row align-items-end" style="width: 100%">
+                           <div slider id="slider1con" class="col-11" style="width: 100%;">
+                              <div id="slider1">
+                                 <div class="inverse-left" id="sl1_0" style="width:70%;"></div>
+                                 <div class="inverse-right" id="sl1_1" style="width:70%;"></div>
+                                 <div class="doubleSlider" id="sl1_2" style="left:30%;right:40%;"></div>
+                                 <span class="thumb" id="sl1_3" style="left:30%;"></span>
+                                 <span class="thumb" id="sl1_4" style="left:60%;"></span>
+                                 <div class="sign" id="sl1_5" style="left:30%;">
+                                    <span id="value">0.3</span>
+                                 </div>
+                                 <div class="sign" id="sl1_6" style="left:60%;">
+                                    <span id="value">0.6</span>
+                                 </div>
+                              </div>
+                              <input class="doubleSlider" type="range" id="BKeyXScale1" style="width: 90%;" tabindex="0" value="30" max="100" min="0" step="1"/>
+                              <input class="doubleSlider" type="range" id="BKeyXScale2" style="width: 90%;" tabindex="0" value="60" max="100" min="0" step="1"/>
+                              <label for="slider1" style="margin-top: 15px;">BKeyXScale</label>
+                           </div>
+                           <div class="col-1" style="padding: 0px;">
+                              <button id="slider1Help" class="rounding special" style="width: 24px; height: 24px; border: #f3f3f3; float: right;">?</button>
+                           </div>
+                        </div> 
+      
+                        <div class="row align-items-end" style="width: 100%">
+                           <div slider id="slider2con" class="col-11" style="width: 100%;">
+                              <div id="slider2">
+                                 <div class="inverse-left" id="sl2_0" style="width:70%;"></div>
+                                 <div class="inverse-right" id="sl2_1" style="width:70%;"></div>
+                                 <div class="doubleSlider" id="sl2_2" style="left:30%;right:40%;"></div>
+                                 <span class="thumb" id="sl2_3" style="left:30%;"></span>
+                                 <span class="thumb" id="sl2_4" style="left:60%;"></span>
+                                 <div class="sign" id="sl2_5" style="left:30%;">
+                                    <span id="value">0.3</span>
+                                 </div>
+                                 <div class="sign" id="sl2_6" style="left:60%;">
+                                    <span id="value">0.6</span>
+                                 </div>
+                              </div>
+                              <input class="doubleSlider" type="range" id="BKeyYScale1" style="width: 90%;" tabindex="0" value="30" max="100" min="0" step="1"/>
+                              <input class="doubleSlider" type="range" id="BKeyYScale2" style="width: 90%;" tabindex="0" value="60" max="100" min="0" step="1"/>
+                              <label for="slider2" style="margin-top: 15px;">BKeyYScale</label>
+                           </div>
+                           <div class="col-1" style="padding: 0px;">
+                              <button id="slider2Help" class="rounding special" style="width: 24px; height: 24px; border: #f3f3f3; float: right;">?</button>
+                           </div>
+                        </div>
+                        
+                        <div class="row align-items-end" style="width: 100%">
+                           <div slider id="slider3con" class="col-11" style="width: 100%;">
+                              <div id="slider3">
+                                 <div class="inverse-left" id="sl3_0" style="width:70%;"></div>
+                                 <div class="inverse-right" id="sl3_1" style="width:70%;"></div>
+                                 <div class="doubleSlider" id="sl3_2" style="left:30%;right:40%;"></div>
+                                 <span class="thumb" id="sl3_3" style="left:30%;"></span>
+                                 <span class="thumb" id="sl3_4" style="left:60%;"></span>
+                                 <div class="sign" id="sl3_5" style="left:30%;">
+                                    <span id="value">54</span>
+                                 </div>
+                                 <div class="sign" id="sl3_6" style="left:60%;">
+                                    <span id="value">108</span>
+                                 </div>
+                              </div>
+                              <input class="doubleSlider" type="range" id="GridAngle1" style="width: 90%;" tabindex="0" value="30" max="100" min="0" step="1"/>
+                              <input class="doubleSlider" type="range" id="GridAngle2" style="width: 90%;" tabindex="0" value="60" max="100" min="0" step="1"/>
+                              <label for="slider3" style="margin-top: 15px;">Grid Angle</label>
+                           </div>
+                           <div class="col-1" style="padding: 0px;">
+                              <button id="slider3Help" class="rounding special" style="width: 24px; height: 24px; border: #f3f3f3; float: right;">?</button>
+                           </div>
+                        </div>
+                        
+                        <div class="row align-items-end" style="width: 100%">
+                           <div slider id="slider4con" class="col-11" style="width: 100%;">
+                              <div id="slider4">
+                                 <div class="inverse-left" id="sl4_0" style="width:70%;"></div>
+                                 <div class="inverse-right" id="sl4_1" style="width:70%;"></div>
+                                 <div class="doubleSlider" id="sl4_2" style="left:30%;right:40%;"></div>
+                                 <span class="thumb" id="sl4_3" style="left:30%;"></span>
+                                 <span class="thumb" id="sl4_4" style="left:60%;"></span>
+                                 <div class="sign" id="sl4_5" style="left:30%;">
+                                    <span id="value">16</span>
+                                 </div>
+                                 <div class="sign" id="sl4_6" style="left:60%;">
+                                    <span id="value">22</span>
+                                 </div>
+                              </div>
+                              <input class="doubleSlider" type="range" id="GridSpacing1" style="width: 90%;" tabindex="0" value="30" max="100" min="0" step="1"/>
+                              <input class="doubleSlider" type="range" id="GridSpacing2" style="width: 90%;" tabindex="0" value="60" max="100" min="0" step="1"/>
+                              <label for="slider4" style="margin-top: 15px;">Grid Spacing</label>
+                           </div>
+                           <div class="col-1" style="padding: 0px;">
+                              <button id="slider4Help" class="rounding special" style="width: 24px; height: 24px; border: #f3f3f3; float: right;">?</button>
+                           </div>
+                        </div>
+                        
+                        <div class="row align-items-end" style="width: 100%">
+                           <div slider id="slider5con" class="col-11" style="width: 100%;">
+                              <div id="slider5">
+                                 <div class="inverse-left" id="sl5_0" style="width:70%;"></div>
+                                 <div class="inverse-right" id="sl5_1" style="width:70%;"></div>
+                                 <div class="doubleSlider" id="sl5_2" style="left:30%;right:40%;"></div>
+                                 <span class="thumb" id="sl5_3" style="left:30%;"></span>
+                                 <span class="thumb" id="sl5_4" style="left:60%;"></span>
+                                 <div class="sign" id="sl5_5" style="left:30%;">
+                                    <span id="value">0.3</span>
+                                 </div>
+                                 <div class="sign" id="sl5_6" style="left:60%;">
+                                    <span id="value">0.6</span>
+                                 </div>
+                              </div>
+                              <input class="doubleSlider" type="range" id="ParcelStoreyScale1" style="width: 90%;" tabindex="0" value="30" max="100" min="0" step="1"/>
+                              <input class="doubleSlider" type="range" id="ParcelStoreyScale2" style="width: 90%;" tabindex="0" value="60" max="100" min="0" step="1"/>
+                              <label for="slider5" style="margin-top: 15px;">Parcel Storey Scale</label>
+                           </div>
+                           <div class="col-1" style="padding: 0px;">
+                              <button id="slider5Help" class="rounding special" style="width: 24px; height: 24px; border: #f3f3f3; float: right;">?</button>
+                           </div>
+                        </div>
+                        
+                        <div class="flexcontainerhorizontal row" style="width: 95%; margin-top: 3vh;">
+                           <div class="col-12">
+                              <div class="row">
+                                 <div class="col-4">
+                                    <input type="number" step="1" id="input1" placeholder="Number of generation">
+                                 </div>
+                                 <div class="col-8">
+                                    <label for="input2" style="padding-left: 0%;">Population</label>
+                                 </div>
+                              </div>
+                              <div class="row">
+                                 <div class="col-4">
+                                    <input type="number" step="1" id="input2" placeholder="Size of population">
+                                 </div>
+                                 <div class="col-8">
+                                    <label for="input1" style="padding-left: 0%;">Generation</label>
+                                 </div>
+                              </div>
+                           </div>
+                        </div>
+
+                        <div class="row" style="width: 95%; margin-top: 2vh">
+                           <h5>Objective Weights (Optional)</h5>
+                        </div>
+
+                        <div class="flexcontainerhorizontal row" style="width: 95%;">
+                           <div class="col-6">
+                              <input type="button" id="weightButton" class="narrow special" value="WEIGHTED: OFF">
+                           </div>
+                        </div>
+
+                        <div id="weightOptions" class="flexcontainerhorizontal row" style="width: 95%; display: none;">
+                           <div class="col-12">
+                              <figcaption class="blockquote-footer">Please enter integers adding up to 100</figcaption>
+                              <div class="row">
+                                 <div class="col-4">
+                                    <input type="number" step="1" id="input3" placeholder="Weight: Orientation">
+                                 </div>
+                                 <div class="col-8">
+                                    <label for="input3" style="padding-left: 0%;">Wg Orientation</label>
+                                 </div>
+                              </div>
+                              <div class="row">
+                                 <div class="col-4">
+                                    <input type="number" step="1" id="input4" placeholder="Weight: Blocked Views">
+                                 </div>
+                                 <div class="col-8">
+                                    <label for="input4" style="padding-left: 0%;">Wg BlockedViews</label>
+                                 </div>
+                              </div>
+                           </div>
+                        </div>
+
+                        <div class="row" style="width: 95%; margin-top: 2vh">
+                           <h5>Optimization Settings (Optional)</h5>
+                        </div>
+
+                        <div class="flexcontainerhorizontal row" style="width: 95%;">
+                           <div class="col-6">
+                              <input type="button" id="hyperButton" class="narrow special" value="OPT SETTINGS: DEFAULT">
+                           </div>
+                        </div>
+
+                        <div id="hyperOptions" class="flexcontainerhorizontal row" style="width: 95%; display: none;">
+                           <div class="col-12">
+                              <figcaption class="blockquote-footer">Please enter values between 0 to 100</figcaption>
+                              <div class="row">
+                                 <div class="col-4">
+                                    <input type="number" step="1" id="input6" value="90">
+                                 </div>
+                                 <div class="col-8">
+                                    <label for="input6" style="padding-left: 0%;">Crossover Rate</label>
+                                 </div>
+                              </div>
+                              <div class="row">
+                                 <div class="col-4">
+                                    <input type="number" step="1" id="input5" value="40">
+                                 </div>
+                                 <div class="col-8">
+                                    <label for="input5" style="padding-left: 0%;">Mutation Rate</label>
+                                 </div>
+                              </div>
+                           </div>
+                        </div>
+                     </div>
+
+                     <div class="flexcontainerhorizontal row" style="width: 95%;">
+                        <div class="col-6">
+                           <input type="button" id="optButton" class="narrow special" value="OPTIMIZE" style="margin-top: 2vh; margin-bottom: 2vh">
+                        </div>
+                     </div>
+                  </div>
+                  
+                  <div id="result" class="flexcontainer container-fluid" style="display: none; align-items:flex-start;">
+                     <div id="phase2" class="flexcontainer container-fluid" style=" align-items:flex-start;">
+                        <div class="row">
+                           <h5 class="col">Results (Simple)</h5>
+                        </div>
+                        <figcaption class="blockquote-footer">All of the results here are pareto optimal.</figcaption>
+                        <div class="row justify-content-start container-fluid">
+                           <div id="buttonListSimple" class="col container-fluid">
+                           </div>
+                        </div>
+                     </div>
+
+                     <div id="phase4" class="flexcontainer container-fluid" style=" align-items:flex-start;">
+                        <div class="row">
+                           <h5 class="col">Results (Advanced)</h5>
+                        </div>
+                        <figcaption id="resultDesc" class="blockquote-footer">Pareto optimal results are labelled in orange buttons.</figcaption>
+                        <div class="row container-fluid" style="align-items: flex-start;">
+                           <div class="col container-fluid ">
+                              <div id="advHeader" class="row justify-content-start">
+                                 <div class="cell col-lg-4" style="opacity: 0; padding: 0px;"></div>
+                                 <div class="cell col-lg-4" style="text-align: center; padding: 0px;">NS Orientation</div>
+                                 <div class="cell col-lg-4" style="text-align: center; padding: 0px;">View Obstruction</div>
+                              </div>
+                              <div id="weightedHeader" class="row justify-content-start">
+                                 <div class="cell col-lg-4" style="opacity: 0; padding: 0px;"></div>
+                                 <div class="cell col-lg-6" style="text-align: center; padding: 0px;">Combined Objective</div>
+                              </div>
+                           </div>
+                        </div>
+                        <div class="row justify-content-start container-fluid">
+                           <div id="buttonListAdv" class="col container-fluid">
+                           </div>
+                        </div>
+                     </div>
+
+                     <div class="row">
+                        <div class="col">
+                           <input type="button" id="reset" class="narrow special" value="RESET" style="margin-top: 2vh;">
+                        </div>
+                     </div>
+                     <div class="row">
+                        <div class="col">
+                           <input type="button" id="submitButton" class="narrow special" value="SUBMIT" style="margin-top: 2vh; margin-bottom: 2vh;">
+                        </div>
+                     </div>
+                  </div>
+
+                  <div id="details" class="container-fluid" style="align-items:flex-start;">
+                     <div class="container-fluid" style="align-items:flex-start; border: solid #1b1b3a 2px;">
+                        <div class="row">
+                           <div class="col-6">
+                              <p>Selected parcel:</p>
+                           </div>
+                           <div class="col-6">
+                              <p id="selectedParcel"></p>
+                           </div>
+                        </div>
+                     </div>
+
+                     <div id="detailsMax" class="container-fluid" style="align-items:flex-start; border: solid #1b1b3a 2px; display: none;">
+                        <div class="row">
+                           <div class="col-6">
+                              <p>Generation:</p>
+                           </div>
+                           <div class="col-6">
+                              <p id="var0"></p>
+                           </div>
+                        </div>
+   
+                        <div class="row">
+                           <div class="col-6">
+                              <p>Population:</p>
+                           </div>
+                           <div class="col-6">
+                              <p id="var1"></p>
+                           </div>
+                        </div>
+   
+                        <div class="row">
+                           <div class="col-6">
+                              <p>BKey X Scale:</p>
+                           </div>
+                           <div class="col-6">
+                              <p id="var2"></p>
+                           </div>
+                        </div>
+   
+                        <div class="row">
+                           <div class="col-6">
+                              <p>BKey Y Scale:</p>
+                           </div>
+                           <div class="col-6">
+                              <p id="var3"></p>
+                           </div>
+                        </div>
+   
+                        <div class="row">
+                           <div class="col-6">
+                              <p>Grid Angle:</p>
+                           </div>
+                           <div class="col-6">
+                              <p id="var4"></p>
+                           </div>
+                        </div>
+   
+                        <div class="row">
+                           <div class="col-6">
+                              <p>Grid Spacing:</p>
+                           </div>
+                           <div class="col-6">
+                              <p id="var5"></p>
+                           </div>
+                        </div>
+   
+                        <div class="row">
+                           <div class="col-6">
+                              <p>Storey Scale:</p>
+                           </div>
+                           <div class="col-6">
+                              <p id="var6"></p>
+                           </div>
+                        </div>
+
+                        <div class="row">
+                           <div class="col-6">
+                              <p>Crossover Rate:</p>
+                           </div>
+                           <div class="col-6">
+                              <p id="var8"></p>
+                           </div>
+                        </div>
+
+                        <div class="row">
+                           <div class="col-6">
+                              <p>Mutation Rate:</p>
+                           </div>
+                           <div class="col-6">
+                              <p id="var7"></p>
+                           </div>
+                        </div>
+                     </div>
+
+                     <div id="detailsWeight" class="container-fluid" style="align-items:flex-start; border: solid #1b1b3a 2px; display: none;">
+                        <div class="row">
+                           <div class="col-6">
+                              <p>Wg Orientation:</p>
+                           </div>
+                           <div class="col-6">
+                              <p id="var10"></p>
+                           </div>
+                        </div>
+   
+                        <div class="row">
+                           <div class="col-6">
+                              <p>Wg BlockedViews:</p>
+                           </div>
+                           <div class="col-6">
+                              <p id="var11"></p>
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+
+                  <p id="output"></p>
+               </div>
+            </div>
+      </div>
+    </body>
+
+   <script type="module" src="index.js"></script>
+   <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+   <script src="https://cdn.jsdelivr.net/npm/popper.js@1.14.3/dist/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
+   <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.1.3/dist/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
+
+   <script src="static/utilities/general.js"></script>
+   <script type="module" src="static/likertMaker.js"></script>
+   <script type="module" src="static/script.js"></script>
+   <script src="https://unpkg.com/three/build/three.min.js"></script>
+</html>
